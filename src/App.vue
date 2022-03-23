@@ -31,16 +31,39 @@
                 const wallColumns = Math.ceil(correctWallWidth / this.plate.width)
                 const wallRows = Math.ceil(correctWallHeigth / this.plate.heigth)
                 const platesForWall = wallRows * wallColumns
+
+                const savedPlatesArr = []
+                const plateArea = this.plate.width * this.plate.heigth
+                this.openings.forEach(i => {
+                    const savedPlatesInOpening = (((+i.width.replace(/,/g,'.') * 10) * (+i.heigth.replace(/,/g,'.') * 10)) / plateArea).toFixed(2)
+                    savedPlatesArr.push(+savedPlatesInOpening)
+                })
+                const allSavedPlates = Math.floor(savedPlatesArr.reduce((prev, curr) => prev + curr, 0))
                 
-                const allOpeningsWidth = +this.openings.reduce((prev, curr) => prev + +curr.width.replace(/,/g,'.'), 0) * 10  // cm to mm
-                const allOpeningsHeigth = +this.openings.reduce((prev, curr) => prev + +curr.heigth.replace(/,/g,'.'), 0) * 10  // cm to mm
+                // const allOpeningsWidth = +this.openings.reduce((prev, curr) => prev + +curr.width.replace(/,/g,'.'), 0) * 10  // cm to mm
+                // const allOpeningsHeigth = +this.openings.reduce((prev, curr) => prev + +curr.heigth.replace(/,/g,'.'), 0) * 10  // cm to mm
 
-                const openingColumns = Math.ceil(allOpeningsWidth / this.plate.width)
-                const openingRows = Math.ceil(allOpeningsHeigth / this.plate.heigth)
-                const platesForOpening = openingRows * openingColumns
+                // const openingColumns = Math.ceil(allOpeningsWidth / this.plate.width)
+                // const openingRows = Math.ceil(allOpeningsHeigth / this.plate.heigth)
+                // const platesForOpening = openingRows * openingColumns
 
-                const result = platesForWall - platesForOpening
+                const result = platesForWall - allSavedPlates
                 return result >= 0 ? result : "Проверьте правильность введенных данных"
+            },
+            calcCement() {
+                const wallArea = Math.ceil(((+this.wallWidth.replace(/,/g,'.')) * (+this.wallHeigth.replace(/,/g,'.'))) * 10) / 10
+                const cementConsumption = 2
+                const totalCementRequired = wallArea * cementConsumption
+
+                const bagCapacity = 25
+                const bagsRequired = Math.ceil(totalCementRequired / bagCapacity)
+                return [totalCementRequired, bagsRequired]
+            },
+            calcWeightPerMeter() {
+                return Math.ceil(1.33 /* amount of plates per meter */ * (this.plate.weigth + 1 /* 2 kilo of cement on every meter. plate is only half heigth of a meter */) * +this.wallHeigth.replace(/,/g,'.'))
+            },
+            calcAllWeight() {
+                return (this.calcPlates() * this.plate.weigth) + (this.calcCement()[0])
             }
         }
     }
@@ -83,9 +106,11 @@
               <p class="center">Результат:</p>
               <p>На данную перегородку потребуется:</p>
               <p>Пазогребневых гипсовых блоков: {{calcPlates()}} шт. общей стоимостью {{calcPlates() * this.blockCost}}р.</p>
+              <p>Сухого клея для пазоргебневых плит: {{calcCement()[0]}}кг. ({{calcCement()[1]}} мешков по 25кг.) </p>
               <p>Стоимость работы по кладке: {{calcPlates() * this.workCost}}р.</p>
               <p>Вес всех плит составит: {{calcPlates() * this.plate.weigth}}кг.</p>
-              <p>Нагрузка на метр погонный: {{Math.ceil(1.33 * this.plate.weigth * this.wallHeigth)}}кг./м.п.</p>
+              <p>Общий вес доставки составит: {{calcAllWeight()}}кг.</p>
+              <p>Нагрузка на метр погонный: {{calcWeightPerMeter()}}кг./м.п.</p>
           </div>
           <div class="error" v-if="typeof calcPlates() === 'string'">
               <h2>{{calcPlates()}}</h2>
