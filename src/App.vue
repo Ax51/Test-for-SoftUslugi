@@ -39,13 +39,6 @@
                     savedPlatesArr.push(+savedPlatesInOpening)
                 })
                 const allSavedPlates = Math.floor(savedPlatesArr.reduce((prev, curr) => prev + curr, 0))
-                
-                // const allOpeningsWidth = +this.openings.reduce((prev, curr) => prev + +curr.width.replace(/,/g,'.'), 0) * 10  // cm to mm
-                // const allOpeningsHeigth = +this.openings.reduce((prev, curr) => prev + +curr.heigth.replace(/,/g,'.'), 0) * 10  // cm to mm
-
-                // const openingColumns = Math.ceil(allOpeningsWidth / this.plate.width)
-                // const openingRows = Math.ceil(allOpeningsHeigth / this.plate.heigth)
-                // const platesForOpening = openingRows * openingColumns
 
                 const result = platesForWall - allSavedPlates
                 return result >= 0 ? result : "Проверьте правильность введенных данных"
@@ -60,7 +53,7 @@
                 return [totalCementRequired, bagsRequired]
             },
             calcWeightPerMeter() {
-                return Math.ceil(1.33 /* amount of plates per meter */ * (this.plate.weigth + 1 /* 2 kilo of cement on every meter. plate is only half heigth of a meter */) * +this.wallHeigth.replace(/,/g,'.'))
+                return Math.ceil((1000 / this.plate.width) /* amount of plates per meter */ * (this.plate.weigth + 1 /* 2 kilo of cement on every meter. plate is only half heigth of a meter */) * +this.wallHeigth.replace(/,/g,'.'))
             },
             calcAllWeight() {
                 return (this.calcPlates() * this.plate.weigth) + (this.calcCement()[0])
